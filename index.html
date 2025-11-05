@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hacked!</title>
+  <style>
+    :root {
+      --green: #00ff6a;
+      --bg: #000000;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--green);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      overflow: hidden;
+    }
+
+    /* Arka plan matrix efekti */
+    .canvas-bg { position: fixed; inset: 0; z-index: 0; }
+    .overlay {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        linear-gradient(to bottom, transparent, rgba(0,0,0,.28) 20%, transparent 40%, rgba(0,0,0,.28) 60%, transparent 80%, rgba(0,0,0,.28));
+      pointer-events: none;
+    }
+
+    /* İçerik */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: clamp(48px, 10vw, 128px);
+      animation: glitch 2s infinite;
+      text-shadow:
+        0 0 10px rgba(0,255,106,0.7),
+        0 0 20px rgba(0,255,106,0.4);
+    }
+
+    @keyframes glitch {
+      0%   { text-shadow:  0 0 12px var(--green),  2px 0 0 #0ff, -2px 0 0 #f0f; }
+      20%  { text-shadow:  0 0 18px var(--green), -2px 0 0 #0ff,  2px 0 0 #f0f; }
+      40%  { text-shadow:  0 0 10px var(--green),  2px 0 0 #0ff, -2px 0 0 #f0f; }
+      60%  { text-shadow:  0 0 18px var(--green), -2px 0 0 #0ff,  2px 0 0 #f0f; }
+      80%  { text-shadow:  0 0 12px var(--green),  2px 0 0 #0ff, -2px 0 0 #f0f; }
+      100% { text-shadow:  0 0 10px var(--green), -2px 0 0 #0ff,  2px 0 0 #f0f; }
+    }
+
+   
+
+  
+  </style>
+</head>
+<body>
+  <!-- Matrix yağmur efekti -->
+  <canvas id="matrix" class="canvas-bg" aria-hidden="true"></canvas>
+  <div class="overlay" aria-hidden="true"></div>
+
+  <main class="wrapper" role="main" aria-label="Hacker themed page">
+    <h1>HACKED!</h1>
+
+    <!-- Ortadaki video (embed uyumlu versiyon) -->
+    
+  </main>
+
+  <script>
+    // Basit "Matrix rain" arka plan efekti
+    (function () {
+      const c = document.getElementById('matrix');
+      const ctx = c.getContext('2d');
+
+      let w, h, cols, drops;
+
+      function resize() {
+        w = c.width = window.innerWidth;
+        h = c.height = window.innerHeight;
+        const fontSize = 14;
+        cols = Math.floor(w / fontSize);
+        drops = Array(cols).fill(0);
+      }
+      window.addEventListener('resize', resize, { passive: true });
+      resize();
+
+      const chars = '01abcdefghijklmnopqrstuvwxyz#$%&*+-/<>=@[]{}';
+
+      function draw() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#00ff6a';
+        ctx.font = '14px monospace';
+
+        for (let i = 0; i < cols; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          const x = i * 14;
+          const y = drops[i] * 14;
+
+          ctx.fillText(text, x, y);
+
+          if (y > h && Math.random() > 0.975) {
+            drops[i] = 0;
+          } else {
+            drops[i]++;
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    })();
+  </script>
+</body>
+</html>
