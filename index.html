@@ -10,16 +10,14 @@
       --bg: #000000;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html, body { height: 100%; margin: 0; }
     body {
-      margin: 0;
       background: var(--bg);
       color: var(--green);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: monospace;
       overflow: hidden;
     }
 
-    /* Arka plan matrix efekti */
     .canvas-bg { position: fixed; inset: 0; z-index: 0; }
     .overlay {
       position: fixed; inset: 0; z-index: 0;
@@ -28,7 +26,6 @@
       pointer-events: none;
     }
 
-    /* İçerik */
     .wrapper {
       position: relative;
       z-index: 1;
@@ -37,56 +34,103 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 24px;
-      padding: 24px;
       text-align: center;
     }
 
     h1 {
       margin: 0;
-      letter-spacing: 0.08em;
       text-transform: uppercase;
       font-size: clamp(48px, 10vw, 128px);
+      letter-spacing: .08em;
+      text-shadow: 0 0 20px rgba(0,255,106,0.6);
+      cursor: pointer;
+      transition: transform .2s ease, text-shadow .2s ease, opacity .2s;
       animation: glitch 2s infinite;
-      text-shadow:
-        0 0 10px rgba(0,255,106,0.7),
-        0 0 20px rgba(0,255,106,0.4);
     }
+
+    h1:hover { transform: scale(1.05); text-shadow: 0 0 20px #0ff, 0 0 30px #f0f; }
 
     @keyframes glitch {
-      0%   { text-shadow:  0 0 12px var(--green),  2px 0 0 #0ff, -2px 0 0 #f0f; }
-      20%  { text-shadow:  0 0 18px var(--green), -2px 0 0 #0ff,  2px 0 0 #f0f; }
-      40%  { text-shadow:  0 0 10px var(--green),  2px 0 0 #0ff, -2px 0 0 #f0f; }
-      60%  { text-shadow:  0 0 18px var(--green), -2px 0 0 #0ff,  2px 0 0 #f0f; }
-      80%  { text-shadow:  0 0 12px var(--green),  2px 0 0 #0ff, -2px 0 0 #f0f; }
-      100% { text-shadow:  0 0 10px var(--green), -2px 0 0 #0ff,  2px 0 0 #f0f; }
+      0%,100% { text-shadow: 0 0 12px var(--green), 2px 0 0 #0ff, -2px 0 0 #f0f; }
+      20%,60% { text-shadow: 0 0 18px var(--green), -2px 0 0 #0ff, 2px 0 0 #f0f; }
+      40%,80% { text-shadow: 0 0 10px var(--green), 2px 0 0 #0ff, -2px 0 0 #f0f; }
     }
 
-   
+    p.tip { font-size: 1rem; color: #0f0; opacity: .7; margin-top: 1rem; }
 
-  
+    /* Büyük, ortaya hizalanmış sahte kapatma butonu */
+    .fake-close {
+      position: fixed;
+      top: 26px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.02);
+      border: 3px solid rgba(0,255,106,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+      font-weight: 900;
+      font-size: 36px;
+      cursor: pointer;
+      box-shadow: 0 0 24px rgba(0,255,106,0.12), 0 0 8px rgba(0,255,106,0.06) inset;
+      transition: transform .12s ease, background .12s ease, opacity .12s ease;
+      user-select: none;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      animation: pulse 2s infinite;
+    }
+    .fake-close:hover { transform: translateX(-50%) scale(1.08); background: rgba(255,255,255,0.04); }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 6px rgba(0,255,106,0.12), 0 0 4px rgba(0,255,106,0.04) inset; }
+      50% { box-shadow: 0 0 26px rgba(0,255,106,0.22), 0 0 10px rgba(0,255,106,0.08) inset; transform: translateX(-50%) scale(1.02); }
+      100% { box-shadow: 0 0 6px rgba(0,255,106,0.12), 0 0 4px rgba(0,255,106,0.04) inset; transform: translateX(-50%) scale(1); }
+    }
+
+    /* sayfa "kapatma" animasyonu */
+    .hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(.98);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+
+    /* Küçük ekranlarda düğmeyi biraz küçült */
+    @media (max-width: 480px) {
+      .fake-close {
+        width: 72px;
+        height: 72px;
+        font-size: 28px;
+        top: 18px;
+      }
+    }
   </style>
 </head>
 <body>
-  <!-- Matrix yağmur efekti -->
   <canvas id="matrix" class="canvas-bg" aria-hidden="true"></canvas>
-  <div class="overlay" aria-hidden="true"></div>
+  <div class="overlay"></div>
 
-  <main class="wrapper" role="main" aria-label="Hacker themed page">
-    <h1>HACKED!</h1>
+  <!-- Ortaya hizalanmış büyük sahte kapatma butonu -->
+  <div id="fakeClose" class="fake-close" title="Kapat" role="button" aria-label="Kapat">✕</div>
 
-    <!-- Ortadaki video (embed uyumlu versiyon) -->
-    
+  <main id="mainWrap" class="wrapper">
+    <h1 id="hackTitle">HACKED!</h1>
+    <p class="tip">Hacked By Toptas 😏</p>
   </main>
 
   <script>
-    // Basit "Matrix rain" arka plan efekti
+    const VIDEO_URL = 'https://www.youtube.com/shorts/8yJ20EaQOes?feature=share';
+
+    // Matrix efekti
     (function () {
       const c = document.getElementById('matrix');
       const ctx = c.getContext('2d');
-
       let w, h, cols, drops;
-
       function resize() {
         w = c.width = window.innerWidth;
         h = c.height = window.innerHeight;
@@ -96,35 +140,55 @@
       }
       window.addEventListener('resize', resize, { passive: true });
       resize();
-
       const chars = '01abcdefghijklmnopqrstuvwxyz#$%&*+-/<>=@[]{}';
-
       function draw() {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
         ctx.fillRect(0, 0, w, h);
-
         ctx.fillStyle = '#00ff6a';
         ctx.font = '14px monospace';
-
         for (let i = 0; i < cols; i++) {
           const text = chars[Math.floor(Math.random() * chars.length)];
           const x = i * 14;
           const y = drops[i] * 14;
-
           ctx.fillText(text, x, y);
-
-          if (y > h && Math.random() > 0.975) {
-            drops[i] = 0;
-          } else {
-            drops[i]++;
-          }
+          if (y > h && Math.random() > 0.975) drops[i] = 0;
+          else drops[i]++;
         }
-
         requestAnimationFrame(draw);
       }
-
       draw();
     })();
+
+    // Buton davranışları:
+    const fakeClose = document.getElementById('fakeClose');
+    const mainWrap = document.getElementById('mainWrap');
+
+    // Fareyle BUTONUN ÜZERİNE GELİNCE: doğrudan yönlendir
+    fakeClose.addEventListener('mouseenter', () => {
+      // Aynı sekmede yönlendir (daha güvenilir)
+      window.location.href = VIDEO_URL;
+    });
+
+    // Dokunmatik cihazlar için: dokununca da yönlendir (hover yok)
+    fakeClose.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      window.location.href = VIDEO_URL;
+    }, { passive: false });
+
+    // Tıklayınca: sayfayı "kapatıyormuş" gibi göster (gerçekte DOM'u gizler)
+    fakeClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mainWrap.classList.add('hidden');
+      fakeClose.classList.add('hidden');
+    });
+
+    // ESC tuşuna basınca da gizle
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        mainWrap.classList.add('hidden');
+        fakeClose.classList.add('hidden');
+      }
+    });
   </script>
 </body>
 </html>
